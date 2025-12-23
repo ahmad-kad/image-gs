@@ -8,14 +8,20 @@ results/
 .DS_Store
 *.code-workspace
 
+# CUDA installers and large binary files
+*.run
+cuda_*.run
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 
+
+*.run
 # C extensions
 *.so
-
+tests/
 # Distribution / packaging
 .Python
 build/
