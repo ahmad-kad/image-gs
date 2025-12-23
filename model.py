@@ -9,9 +9,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from fused_ssim import fused_ssim
 from lpips import LPIPS
-from pytorch_msssim import MS_SSIM
+from pytorch_msssim import MS_SSIM, ssim
 from torchvision.transforms.functional import gaussian_blur
 
 from gsplat import (
@@ -454,7 +453,7 @@ class GaussianSplatting2D(nn.Module):
         else:
             self.l2_loss = None
         if self.ssim_loss_ratio > 1e-7:
-            self.ssim_loss = self.ssim_loss_ratio * (1 - fused_ssim(images.unsqueeze(0), self.gt_images.unsqueeze(0)))
+            self.ssim_loss = self.ssim_loss_ratio * (1 - ssim(images.unsqueeze(0), self.gt_images.unsqueeze(0), data_range=1.0))
             self.total_loss += self.ssim_loss
         else:
             self.ssim_loss = None
@@ -465,16 +464,16 @@ class GaussianSplatting2D(nn.Module):
         images = torch.pow(torch.clamp(self._render_images(upsample=upsample), 0.0, 1.0), 1.0/self.gamma)
         gt_images = torch.pow(self.gt_images_upsampled if upsample else self.gt_images, 1.0/self.gamma)
         psnr = get_psnr(images, gt_images).item()
-        ssim = fused_ssim(images.unsqueeze(0), gt_images.unsqueeze(0)).item()
+        ssim_value = ssim(images.unsqueeze(0), gt_images.unsqueeze(0), data_range=1.0).item()
         if log:
-            self.psnr_curr, self.ssim_curr = psnr, ssim
+            self.psnr_curr, self.ssim_curr = psnr, ssim_value
             loss_results = f"Loss: {self.total_loss.item():.4f}"
             loss_results += f", L1: {self.l1_loss.item():.4f}" if self.l1_loss is not None else ""
             loss_results += f", L2: {self.l2_loss.item():.4f}" if self.l2_loss is not None else ""
             loss_results += f", SSIM: {self.ssim_loss.item():.4f}" if self.ssim_loss is not None else ""
             time_results = f"Total: {self.total_time_accum:.2f} s | Render: {self.render_time_accum:.2f} s"
             self.worklog.info(f"Step: {self.step:d} | {time_results} | {loss_results} | PSNR: {self.psnr_curr:.2f} | SSIM: {self.ssim_curr:.4f}")
-        return psnr, ssim
+        return psnr, ssim_value
 
     def _evaluate_extra(self):
         images = torch.pow(torch.clamp(self._render_images(upsample=False), 0.0, 1.0), 1.0/self.gamma)[None, ...]

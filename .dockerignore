@@ -1,0 +1,49 @@
+# Version control
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Results and outputs
+results/
+*.pth
+*.pkl
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Temporary files
+*.tmp
+*.log
+
+# Node modules (if any)
+node_modules/
+
+# Environment files
+.env
+.venv
+env/
+venv/
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore

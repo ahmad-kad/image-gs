@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  image-gs:
+    build: .
+    container_name: image-gs-container
+    volumes:
+      - .:/workspace
+      - ./results:/workspace/results
+      - ./media:/workspace/media
+    working_dir: /workspace
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=all
+    stdin_open: true
+    tty: true
+    command: ["/bin/bash"]
